@@ -116,6 +116,9 @@ class Lexer():
         return self
 
     def __next__(self):
+        return self.next_token()
+
+    def next_token(self):
         token_start_position = None
         filter_len = len(self._filter_str)
         token = None
