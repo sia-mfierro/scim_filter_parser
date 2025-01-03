@@ -1,7 +1,11 @@
 import re
 from enum import Enum
 from dataclasses import dataclass
-from .operators import _present_op, _logic_ops, _comparison_ops
+from .operators import (
+    _present_op, _logic_ops, _comparison_ops, 
+    _precedence_open_lit, _precedence_close_lit, 
+    _attribute_filter_open_lit, _attribute_filter_close_lit
+)
 from .err_strings import (
     _no_spaces_before_complex_group_open,
     _no_spaces_after_complex_group_open,
@@ -124,7 +128,7 @@ class Lexer():
                 if token_start_position is None:
                     token_start_position = self._position
                     
-                if current_character == "[":
+                if current_character == _attribute_filter_open_lit:
                     if next_character and next_character.isspace():
                         raise ValueError(f"{_no_spaces_after_complex_group_open} {self._position}")
                     if previous_character and previous_character.isspace():
@@ -133,7 +137,7 @@ class Lexer():
                         token = self.emit_token(ComplexFilterGroupStartToken, token_start_position, self._position)
                         break
                     ValueError(f"Unexpected attribute group open at positon: {self._position}")
-                elif current_character == "]":
+                elif current_character == _attribute_filter_close_lit:
                     if next_character and not next_character.isspace():
                         raise ValueError(f"{_missing_space_after_complex_group_close} {self._position}")
                     if previous_character and previous_character.isspace():
@@ -142,7 +146,7 @@ class Lexer():
                         token = self.emit_token(ComplexFilterGroupEndToken, token_start_position, self._position)
                         break
                     ValueError(f"Unexpected attribute group close at positon: {self._position}")
-                elif current_character == "(":
+                elif current_character == _precedence_open_lit:
                     if next_character and next_character.isspace():
                         raise ValueError(f"{_no_spaces_after_precedence_group_open} {self._position}")
                     if previous_character and not previous_character.isspace():
@@ -151,7 +155,7 @@ class Lexer():
                         token = self.emit_token(PrecedenceGroupStartToken, token_start_position, self._position)
                         break
                     ValueError(f"Unexpected logic group open at positon: {self._position}")
-                elif current_character == ")":
+                elif current_character == _precedence_close_lit:
                     if token_start_position == self._position and previous_character and previous_character.isspace():
                         raise ValueError(f"No spaces allowed before logic group closing at position: {self._position}")
                     if token_start_position == self._position and next_character and not next_character.isspace():
@@ -160,7 +164,7 @@ class Lexer():
                         token = self.emit_token(PrecedenceGroupEndToken, token_start_position, self._position)
                         break
                     raise ValueError(f"Unexpected logic group open at positon: {self._position}")
-                elif (next_character and (next_character.isspace() or next_character == "[")) or eof:
+                elif (next_character and (next_character.isspace() or next_character == _attribute_filter_open_lit)) or eof:
                     token :Token = self.emit_token(Token, token_start_position, self._position)
                     if token.value in _comparison_ops:
                         token = ComparisonOperatorToken(value=token.value, position=token.position)
