@@ -101,6 +101,12 @@ class Lexer():
             self._filter_str :str = filter_str
             self._position :int = len(Lexer.leading_str)-1
             self._state :Lexer.State = Lexer.State.Filter
+    
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.next_token()
 
     def emit_token(self, cls :type, start_pos :int, end_pos :int):
         return cls(self._filter_str[start_pos:end_pos+1], start_pos)
@@ -111,12 +117,6 @@ class Lexer():
         if self._position + op_len <= filter_len:
             return self._filter_str[self._position:self._position + op_len] == op
         return False
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self.next_token()
 
     def next_token(self):
         token_start_position = None
