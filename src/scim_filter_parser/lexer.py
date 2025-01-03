@@ -104,7 +104,14 @@ class Lexer():
 
     def emit_token(self, cls :type, start_pos :int, end_pos :int):
         return cls(self._filter_str[start_pos:end_pos+1], start_pos)
-    
+
+    def match_literal_op(self, op :str):
+        filter_len = len(self._filter_str)
+        op_len = len(op)
+        if self._position + op_len <= filter_len:
+            return self._filter_str[self._position:self._position + op_len] == op
+        return False
+
     def __iter__(self):
         return self
 
