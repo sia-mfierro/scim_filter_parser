@@ -20,6 +20,8 @@ from .err_strings import (
 )
 
 digit_program = re.compile(r"\d")
+alpha_program = re.compile(r"[a-zA-Z]")
+namechar_program = re.compile(r"[a-zA-Z0-9_\-]")
 
 def isspace(string):
     # In https://datatracker.ietf.org/doc/html/rfc5234
