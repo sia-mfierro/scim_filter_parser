@@ -2,7 +2,7 @@ import pytest
 from scim_filter_parser.lexer import (
     Lexer, Token, 
     NumericLiteralToken, StringLiteralToken, TrueLiteralToken, FalseLiteralToken, NullLiteralToken,
-    PresenceOperatorToken, ComparisonOperatorToken,
+    PresenceOperatorToken, ComparisonOperatorToken, NotOperatorToken,
     ComplexFilterGroupStartToken, ComplexFilterGroupEndToken,
     LogicOperatorToken, PrecedenceGroupEndToken, PrecedenceGroupStartToken, 
 )
@@ -102,7 +102,7 @@ valid_examples_from_rfc = {
         ComparisonOperatorToken(value='ne', position=16),
         StringLiteralToken(value='"Employee"', position=19),
         LogicOperatorToken(value='and', position=30),
-        LogicOperatorToken(value='not', position=34),
+        NotOperatorToken(value='not', position=34),
         PrecedenceGroupStartToken(value='(', position=38),
         Token(value='emails', position=39),
         ComparisonOperatorToken(value='co', position=46),

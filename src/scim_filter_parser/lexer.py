@@ -2,7 +2,7 @@ import re
 from enum import Enum
 from dataclasses import dataclass
 from .operators import (
-    _present_op, _logic_ops, _comparison_ops, 
+    _present_op, _not_op, _logic_ops, _comparison_ops, 
     _precedence_open_lit, _precedence_close_lit, 
     _attribute_filter_open_lit, _attribute_filter_close_lit
 )
@@ -183,7 +183,9 @@ class Lexer():
                         token = LogicOperatorToken(value=token.value, position=token.position)
                     elif token.value == _present_op:
                         token = PresenceOperatorToken(value=token.value, position=token.position)
-                    break                        
+                    elif token.value == _not_op:
+                        token = NotOperatorToken(value=token.value, position=token.position)
+                    break
             elif self._state == Lexer.State.ComparisonValue:
                 if current_character.isspace():
                     continue
