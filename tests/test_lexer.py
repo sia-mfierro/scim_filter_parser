@@ -4,20 +4,15 @@ from scim_filter_parser.lexer import (
     NumericLiteralToken, StringLiteralToken, TrueLiteralToken, FalseLiteralToken, NullLiteralToken,
     PresenceOperatorToken, ComparisonOperatorToken,
     ComplexFilterGroupStartToken, ComplexFilterGroupEndToken,
-    LogicOperatorToken, PrecedenceGroupEndToken, PrecedenceGroupStartToken
+    LogicOperatorToken, PrecedenceGroupEndToken, PrecedenceGroupStartToken, 
 )
 from scim_filter_parser.err_strings import (
-    _no_spaces_before_complex_group_open,
-    _no_spaces_after_complex_group_open,
-    _no_spaces_before_complex_group_close,
-    _missing_space_after_complex_group_close,
-    _missing_space_before_precedence_group_open,
-    _no_spaces_after_precedence_group_open,
     _invalid_numeric_literal,
     _unexpected_character,
     _unexpected_end_of_input,
     _unterminated_string,
     _unexpected_space,
+    _missing_space
 )
 
 # The following are taken from the RFC
@@ -174,52 +169,49 @@ def test_valid_example_filters_from_rfc():
         print(f"Testing example filter: {k}")
         lexer = Lexer(k)
         tokens = [x for x in lexer]
-        # print(tokens)
-        # print(v)
         assert tokens == v
-        break
 
 def test_space_before_attribute_group_open():
     f = 'filter=emails [type eq "work" and value co "@example.com"]'
     lexer = Lexer(f)
     with pytest.raises(ValueError) as e:
         _ = [x for x in lexer]
-        assert str(e) == f"{_no_spaces_before_complex_group_open} 14"
+        assert str(e) == f"{_unexpected_space} 14"
         
 def test_space_after_attribute_group_open():
     f = 'filter=emails[ type eq "work" and value co "@example.com"]'
     lexer = Lexer(f)
     with pytest.raises(ValueError) as e:
         _ = [x for x in lexer]
-        assert str(e) == f"{_no_spaces_after_complex_group_open} 14"
+        assert str(e) == f"{_unexpected_space} 14"
 
 def test_space_before_attribute_group_close():
     f = 'filter=emails[type eq "work" and value co "@example.com" ]'
     lexer = Lexer(f)
     with pytest.raises(ValueError) as e:
         _ = [x for x in lexer]
-        assert str(e) == f"{_no_spaces_before_complex_group_close} 57"
+        assert str(e) == f"{_unexpected_space} 57"
 
 def test_missing_space_after_attribute_group_close():
     f = 'filter=emails[type eq "work"]and value co "@example.com"'
     lexer = Lexer(f)
     with pytest.raises(ValueError) as e:
         _ = [x for x in lexer]
-        assert str(e) == f"{_missing_space_after_complex_group_close} 28"
+        assert str(e) == f"{_missing_space} 28"
 
 def test_missing_space_before_logic_group_open():
     f = 'filter=userType eq "Employee" and(emails.type eq "work")' 
     lexer = Lexer(f)
     with pytest.raises(ValueError) as e:
         _ = [x for x in lexer]
-        assert str(e) == f"{_missing_space_before_precedence_group_open} 33"
+        assert str(e) == f"{_missing_space} 33"
         
 def test_space_after_logic_group_open():
     f = 'filter=userType eq "Employee" and ( emails.type eq "work")' 
     lexer = Lexer(f)
     with pytest.raises(ValueError) as e:
         _ = [x for x in lexer]
-        assert str(e) == f"{_no_spaces_after_precedence_group_open} 34"
+        assert str(e) == f"{_unexpected_space} 34"
 
 def test_valid_numeric_literal():
     f = 'filter=userType eq 7657' 

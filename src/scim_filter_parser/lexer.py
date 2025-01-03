@@ -7,16 +7,12 @@ from .operators import (
     _attribute_filter_open_lit, _attribute_filter_close_lit
 )
 from .err_strings import (
-    _no_spaces_before_complex_group_open,
-    _no_spaces_after_complex_group_open,
-    _no_spaces_before_complex_group_close,
-    _missing_space_after_complex_group_close,
-    _missing_space_before_precedence_group_open,
-    _no_spaces_after_precedence_group_open,
     _invalid_numeric_literal,
     _unexpected_character,
     _unexpected_end_of_input,
     _unterminated_string,
+    _unexpected_space,
+    _missing_space
 )
 
 digit_program = re.compile(r"\d")
@@ -78,6 +74,9 @@ class ComparisonOperatorToken(Token):
 class PresenceOperatorToken(Token):
     pass
 
+class NotOperatorToken(Token):
+    pass
+
 class Lexer():
     leading_str = "filter="
     
@@ -89,8 +88,7 @@ class Lexer():
         TrueLiteral = 4
         FalseLiteral = 5
         NullLiteral = 6
-        
-    
+
     def __init__(self, filter_str :str):
         self._position = -1
         if not filter_str:
@@ -142,36 +140,36 @@ class Lexer():
                     
                 if current_character == _attribute_filter_open_lit:
                     if next_character and isspace(next_character):
-                        raise ValueError(f"{_no_spaces_after_complex_group_open} {self._position}")
+                        raise ValueError(f"{_unexpected_space} {self._position}")
                     if previous_character and isspace(previous_character):
-                        raise ValueError(f"{_no_spaces_before_complex_group_open} {self._position}")
+                        raise ValueError(f"{_unexpected_space} {self._position}")
                     if (previous_character and not isspace(previous_character)) or eof:
                         token = self.emit_token(ComplexFilterGroupStartToken, token_start_position, self._position)
                         break
                     ValueError(f"Unexpected attribute group open at positon: {self._position}")
                 elif current_character == _attribute_filter_close_lit:
                     if next_character and not isspace(next_character):
-                        raise ValueError(f"{_missing_space_after_complex_group_close} {self._position}")
+                        raise ValueError(f"{_missing_space} {self._position}")
                     if previous_character and isspace(previous_character):
-                        raise ValueError(f"{_no_spaces_before_complex_group_close} {self._position}")
+                        raise ValueError(f"{_unexpected_space} {self._position}")
                     if (previous_character and not isspace(previous_character)) or eof:
                         token = self.emit_token(ComplexFilterGroupEndToken, token_start_position, self._position)
                         break
                     ValueError(f"Unexpected attribute group close at positon: {self._position}")
                 elif current_character == _precedence_open_lit:
                     if next_character and isspace(next_character):
-                        raise ValueError(f"{_no_spaces_after_precedence_group_open} {self._position}")
+                        raise ValueError(f"{_unexpected_space} {self._position}")
                     if previous_character and not isspace(previous_character):
-                        raise ValueError(f"{_missing_space_before_precedence_group_open} {self._position}")
+                        raise ValueError(f"{_missing_space} {self._position}")
                     if token_start_position == self._position and (isspace(previous_character) or eof):
                         token = self.emit_token(PrecedenceGroupStartToken, token_start_position, self._position)
                         break
                     ValueError(f"Unexpected logic group open at positon: {self._position}")
                 elif current_character == _precedence_close_lit:
                     if token_start_position == self._position and previous_character and isspace(previous_character):
-                        raise ValueError(f"No spaces allowed before logic group closing at position: {self._position}")
+                        raise ValueError(f"{_unexpected_space} {self._position}")
                     if token_start_position == self._position and next_character and not isspace(next_character):
-                        raise ValueError(f"Missing space after logic group closing at position: {self._position}")
+                        raise ValueError(f"{_missing_space} {self._position}")
                     if token_start_position == self._position and (isspace(previous_character) or eof):
                         token = self.emit_token(PrecedenceGroupEndToken, token_start_position, self._position)
                         break
